@@ -38,72 +38,82 @@ class _SignInState extends State<SignIn> {
                     label: Text("Register"))
               ],
             ),
-            body: Container(
-              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-              child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      TextFormField(
-                        decoration:
-                            textInputDecoration.copyWith(hintText: "Email"),
-                        validator: (val) =>
-                            val.isEmpty ? "Please fill out this field" : null,
-                        onChanged: (val) {
-                          setState(() {
-                            email = val;
-                          });
-                        },
-                      ),
-                      SizedBox(height: 20.0),
-                      TextFormField(
-                        decoration:
-                            textInputDecoration.copyWith(hintText: "Password"),
-                        validator: (val) =>
-                            val.isEmpty ? "Please fill out this field" : null,
-                        onChanged: (val) {
-                          setState(() {
-                            password = val;
-                          });
-                        },
-                        obscureText: true,
-                      ),
-                      SizedBox(height: 20.0),
-                      RaisedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState.validate()) {
-                            setState(() {
-                              loading = true;
-                            });
-                            dynamic result = await _authService
-                                .signInWithEmailAndPassword(email, password);
-                            if (result == null) {
-                              setState(() {
-                                error =
-                                    "Failed to sign in! Please check your credentials";
-                                loading = false;
-                              });
-                            }
-                          }
-                        },
-                        color: Colors.green,
-                        child: Text(
+            body: SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+                child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: <Widget>[
+                        Image.asset(
+                          "assets/images/splash.png",
+                        ),
+                        Text(
                           "Sign In",
                           style: TextStyle(
-                            color: Colors.white,
+                              fontSize: 40.0, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        TextFormField(
+                          decoration:
+                              textInputDecoration.copyWith(hintText: "Email"),
+                          validator: (val) =>
+                              val.isEmpty ? "Please fill out this field" : null,
+                          onChanged: (val) {
+                            setState(() {
+                              email = val;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20.0),
+                        TextFormField(
+                          decoration: textInputDecoration.copyWith(
+                              hintText: "Password"),
+                          validator: (val) =>
+                              val.isEmpty ? "Please fill out this field" : null,
+                          onChanged: (val) {
+                            setState(() {
+                              password = val;
+                            });
+                          },
+                          obscureText: true,
+                        ),
+                        SizedBox(height: 20.0),
+                        RaisedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              setState(() {
+                                loading = true;
+                              });
+                              dynamic result = await _authService
+                                  .signInWithEmailAndPassword(email, password);
+                              if (result == null) {
+                                setState(() {
+                                  error =
+                                      "Failed to sign in! Please check your credentials";
+                                  loading = false;
+                                });
+                              }
+                            }
+                          },
+                          color: Colors.green,
+                          child: Text(
+                            "Sign In",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Text(
-                        error,
-                        style: TextStyle(color: Colors.red, fontSize: 14.0),
-                      )
-                    ],
-                  )),
+                        SizedBox(height: 20.0),
+                        Text(
+                          error,
+                          style: TextStyle(color: Colors.red, fontSize: 14.0),
+                        )
+                      ],
+                    )),
+              ),
             ),
           );
   }
