@@ -15,28 +15,18 @@ class AuthService {
     return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
   }
 
-  //Create a method to sign in anonymously
-  Future signInAnon() async {
-    try {
-      AuthResult result = await _auth.signInAnonymously();
-      FirebaseUser user = result.user;
-      return _userFromFirebaseUser(user);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
   // Register with email and password
-  Future registerWithEmailAndPassword(String email, String password) async {
+  Future registerWithEmailAndPassword(String email, String password,
+      String personName, DateTime birthdate) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
-
-      //create a new document for the user with the uid
       await DatabaseService(uid: user.uid)
-          .updateUserData('sugars', 'name', 100);
+          .setUserDetails(personName, birthdate);
+      //create a new document for the user with the uid
+      await DatabaseService(uid: user.uid).updateUserData('0', personName, 100);
+      user.sendEmailVerification();
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
@@ -55,6 +45,11 @@ class AuthService {
       print(e.toString());
       return null;
     }
+  }
+
+  Future isVerified() async {
+    FirebaseUser userP = await _auth.currentUser();
+    return userP.isEmailVerified;
   }
 
   //sign out

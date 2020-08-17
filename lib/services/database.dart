@@ -9,10 +9,19 @@ class DatabaseService {
   final CollectionReference brewCollection =
       Firestore.instance.collection('brews');
 
+  final CollectionReference userCollection =
+      Firestore.instance.collection('users');
+
   Future updateUserData(String sugars, String name, int strength) async {
     return await brewCollection
         .document(uid)
         .setData({'sugars': sugars, 'name': name, 'strength': strength});
+  }
+
+  Future setUserDetails(String name, DateTime birthdate) async {
+    return await userCollection
+        .document(uid)
+        .setData({"name": name, "birthdate": birthdate});
   }
 
   //brew list from snapshot
