@@ -47,9 +47,14 @@ class AuthService {
     }
   }
 
-  Future isVerified() async {
-    FirebaseUser userP = await _auth.currentUser();
-    return userP.isEmailVerified;
+  Future resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return true;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   //sign out

@@ -4,11 +4,28 @@ var textInputDecoration = InputDecoration(
   fillColor: Colors.white,
   filled: true,
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.grey, width: 2.0),
-    borderRadius: BorderRadius.circular(25.0),
+    borderSide: BorderSide(
+      color: Colors.green,
+    ),
+    borderRadius: BorderRadius.circular(10.0),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.green, width: 2.0),
-    borderRadius: BorderRadius.circular(25.0),
+    borderSide: BorderSide(
+      width: 3.0,
+      color: Colors.blueAccent,
+    ),
+    borderRadius: BorderRadius.circular(10.0),
+  ),
+  disabledBorder: OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Colors.grey,
+    ),
+    borderRadius: BorderRadius.circular(10.0),
+  ),
+  errorBorder: OutlineInputBorder(
+    borderSide: BorderSide(
+      color: Colors.red,
+    ),
+    borderRadius: BorderRadius.circular(10.0),
   ),
 );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oria/models/user.dart';
-import 'package:oria/screens/home/home2.dart';
 import 'package:provider/provider.dart';
 import 'home/home.dart';
 import 'authenticate/authenticate.dart';
