@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oria/screens/doctors/listing_doctors/doctors.dart';
 import 'package:oria/services/auth.dart';
 import 'package:provider/provider.dart';
 import 'models/user.dart';
@@ -16,8 +17,13 @@ class MyApp extends StatelessWidget {
     return StreamProvider<User>.value(
       value: AuthService().user,
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Wrapper(),
+        initialRoute: '/',
+        routes: {
+          // When navigating to the "/" route, build the FirstScreen widget.
+          '/': (context) => Wrapper(),
+          // When navigating to the "/second" route, build the SecondScreen widget.
+          '/doctors': (context) => Doctors(),
+        },
       ),
     );
   }

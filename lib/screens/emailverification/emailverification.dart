@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:oria/screens/home/home.dart';
+import 'package:oria/screens/home/homeMain.dart';
 
 class EmailVerification extends StatelessWidget {
   @override
@@ -22,7 +22,7 @@ class EmailVerification extends StatelessWidget {
               SizedBox(width: 5.0),
               FlatButton(
                 onPressed: () {
-                  return Home();
+                  return HomeMain();
                 },
                 child: Text(
                   "Done",

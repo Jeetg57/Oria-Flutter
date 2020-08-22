@@ -34,6 +34,12 @@ dependencies:
   bottom_navy_bar: ^5.5.0
   date_field: ^0.3.0
   flutter_svg: ^0.18.0
+  font_awesome_flutter: ^8.8.1
+  google_maps_flutter: ^0.5.27+3
+  location: ^3.0.2
+  geoflutterfire: ^2.1.0
+  http: ^0.12.2
+  flutter_rating_bar: ^3.0.1+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -49,6 +55,7 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/
     - assets/images/
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
