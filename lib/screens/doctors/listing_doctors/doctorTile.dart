@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:oria/models/doctor.dart';
 import 'package:oria/screens/doctors/individual_info/doctor.dart';
 
@@ -8,7 +7,6 @@ class DoctorTile extends StatelessWidget {
   DoctorTile({this.doctor});
   @override
   Widget build(BuildContext context) {
-    var f = new NumberFormat("#,##0", "en_US");
     return Padding(
       padding: EdgeInsets.only(top: 8.0),
       child: Container(

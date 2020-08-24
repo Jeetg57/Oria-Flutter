@@ -27,7 +27,7 @@ class _DoctorsState extends State<Doctors> {
                 fontWeight: FontWeight.bold),
           ),
           leading: FlatButton.icon(
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.only(left: 10.0),
               onPressed: () => Navigator.pop(context),
               icon: Icon(Icons.arrow_back_ios, color: Colors.black),
               label: Text("")),

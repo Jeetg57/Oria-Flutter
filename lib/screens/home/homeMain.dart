@@ -11,8 +11,7 @@ class HomeMain extends StatelessWidget {
   final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User>(context);
-    final devWidth = MediaQuery.of(context).size.width;
+    final user = Provider.of<UserFB>(context);
     return StreamBuilder<UserData>(
         stream: DatabaseService(uid: user.uid).userData,
         builder: (context, snapshot) {
@@ -36,14 +35,16 @@ class HomeMain extends StatelessWidget {
                         accountName: Text(userData.name),
                         accountEmail: Text(userData.email),
                         currentAccountPicture: CircleAvatar(
-                          backgroundColor:
-                              Theme.of(context).platform == TargetPlatform.iOS
-                                  ? Colors.blue
-                                  : Colors.white,
-                          child: Text(
-                            userData.name[0],
-                            style: TextStyle(fontSize: 40.0),
-                          ),
+                          backgroundImage: NetworkImage(
+                              "https://firebasestorage.googleapis.com/v0/b/oria-68e38.appspot.com/o/userImages%2Fperson1.jpg?alt=media&token=f94732ef-c7c4-4e13-b58a-3346299301f5"),
+                          // backgroundColor:
+                          //     Theme.of(context).platform == TargetPlatform.iOS
+                          //         ? Colors.blue
+                          //         : Colors.white,
+                          // child: Text(
+                          //   userData.name[0],
+                          //   style: TextStyle(fontSize: 40.0),
+                          // ),
                         ),
                       ),
                       ListTile(

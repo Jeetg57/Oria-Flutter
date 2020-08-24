@@ -1,6 +1,6 @@
-class User {
+class UserFB {
   final String uid;
-  User({this.uid});
+  UserFB({this.uid});
 }
 
 class UserData {
@@ -8,5 +8,8 @@ class UserData {
   final String name;
   final String birthdate;
   final String email;
-  UserData({this.uid, this.name, this.birthdate, this.email});
+  final String profilePicture;
+
+  UserData(
+      {this.uid, this.name, this.birthdate, this.email, this.profilePicture});
 }
