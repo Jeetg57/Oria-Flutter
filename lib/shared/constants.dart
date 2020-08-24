@@ -29,3 +29,11 @@ var textInputDecoration = InputDecoration(
     borderRadius: BorderRadius.circular(10.0),
   ),
 );
+
+var searchInputDecoration = InputDecoration(
+  fillColor: Colors.grey,
+  focusColor: Colors.grey,
+  hoverColor: Colors.grey,
+  prefixIcon: Icon(Icons.search),
+  border: InputBorder.none,
+);

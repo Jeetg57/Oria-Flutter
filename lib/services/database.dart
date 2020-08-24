@@ -31,8 +31,9 @@ class DatabaseService {
       return DoctorData(
         id: document.documentID,
         name: document.data['name'] ?? "",
-        speciality: document.data['speciality'] ?? "",
+        specialty: document.data['specialty'] ?? "",
         appointmentPrice: document.data['appointmentPrice'] ?? 0,
+        city: document.data['city'] ?? "",
       );
     }).toList();
   }
@@ -50,7 +51,7 @@ class DatabaseService {
   DoctorData _doctorDataFromSnapshot(DocumentSnapshot snapshot) {
     return DoctorData(
       name: snapshot.data['name'] ?? "",
-      speciality: snapshot.data['speciality'] ?? "",
+      specialty: snapshot.data['specialty'] ?? "",
       appointmentPrice: snapshot.data['appointmentPrice'] ?? 0,
       location: snapshot.data['location'] ?? 0,
       experience: snapshot.data['experience'] ?? 0,
@@ -58,6 +59,11 @@ class DatabaseService {
       numRated: snapshot.data['numRated'] ?? 0,
       pictureLink: snapshot.data['pictureLink'] ?? "",
       totalRatings: snapshot.data['totalRatings'] ?? 0,
+      location1: snapshot.data['location1'] ?? "",
+      location2: snapshot.data['location2'] ?? "",
+      city: snapshot.data['city'] ?? "",
+      conditionsTreated: snapshot.data['conditionsTreated'] ?? [],
+      study: snapshot.data['study'] ?? "",
     );
   }
 
