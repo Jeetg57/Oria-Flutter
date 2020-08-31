@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:oria/models/appointments.dart';
 import 'package:oria/models/doctor.dart';
 import 'package:oria/models/user.dart';
 
@@ -15,11 +16,30 @@ class DatabaseService {
   final CollectionReference doctorsCollection =
       FirebaseFirestore.instance.collection('doctors');
 
+  final CollectionReference appointmentCollection =
+      FirebaseFirestore.instance.collection('appointments');
+
   // Future updateUserData(String sugars, String name, int strength) async {
   //   return await brewCollection
   //       .document(uid)
   //       .setData({'sugars': sugars, 'name': name, 'strength': strength});
   // }
+  Future setAppointment(
+      {String uid, String doctorId, DateTime dateTime}) async {
+    try {
+      await appointmentCollection.doc().set({
+        "userId": uid,
+        "doctorId": doctorId,
+        "time": dateTime,
+        "bookedAt": DateTime.now(),
+        "approval": "Pending"
+      });
+      return true;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
 
   Future setUserDetails(String name, DateTime birthdate, String email) async {
     return await userCollection
@@ -88,5 +108,36 @@ class DatabaseService {
         .doc(doctorId)
         .snapshots()
         .map(_doctorDataFromSnapshot);
+  }
+
+  Stream<List<Appointment>> appointmentData(userId) {
+    return appointmentCollection
+        .where("userId", isEqualTo: userId)
+        .orderBy("approval")
+        .snapshots()
+        .map(_appointmentDataFromSnapshot);
+  }
+}
+
+List<Appointment> _appointmentDataFromSnapshot(QuerySnapshot snapshot) {
+  try {
+    return snapshot.docs.map((document) {
+      DateTime bookedAt =
+          DateTime.parse(document.data()['bookedAt'].toDate().toString());
+      DateTime time =
+          DateTime.parse(document.data()['time'].toDate().toString());
+
+      return Appointment(
+          userId: document.data()['userId'] ?? "",
+          approval: document.data()['approval'] ?? "",
+          bookedAt: bookedAt,
+          time: time,
+          doctorId: document.data()['doctorId'] ?? ""
+          // birthdate: snapshot.data['birthdate']);
+          );
+    }).toList();
+  } catch (e) {
+    print(e.toString());
+    return null;
   }
 }

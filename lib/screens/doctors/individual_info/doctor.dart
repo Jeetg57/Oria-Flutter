@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:oria/models/doctor.dart';
+import 'package:oria/screens/appointments/appointmentbooking.dart';
 import 'package:oria/services/database.dart';
 import 'package:oria/shared/loadingWidget.dart';
 
-class DoctorIndividual extends StatelessWidget {
+class DoctorIndividual extends StatefulWidget {
   final String doctorId;
   DoctorIndividual({Key key, @required this.doctorId}) : super(key: key);
   @override
+  _DoctorIndividualState createState() => _DoctorIndividualState();
+}
+
+class _DoctorIndividualState extends State<DoctorIndividual> {
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<DoctorData>(
-        stream: DatabaseService().doctorData(doctorId),
+        stream: DatabaseService().doctorData(widget.doctorId),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             DoctorData doctorData = snapshot.data;
@@ -176,7 +182,7 @@ class DoctorIndividual extends StatelessWidget {
                                   begin: Alignment.bottomRight,
                                   end: Alignment.centerLeft)),
                           child: Text(
-                            "Book",
+                            "Call",
                             style: TextStyle(
                               color: Colors.black87,
                               fontWeight: FontWeight.bold,
@@ -187,29 +193,34 @@ class DoctorIndividual extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                      height: 44.0,
-                      child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: doctorData.conditionsTreated.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(22.0),
-                                border: Border.all(color: Colors.white),
-                              ),
-                              margin: EdgeInsets.only(right: 13.0),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 13.0,
-                                    bottom: 5.0,
-                                    right: 20.0,
-                                    left: 20.0),
-                                child: Text(doctorData.conditionsTreated[index],
-                                    style: TextStyle(color: Colors.white)),
-                              ),
-                            );
-                          })),
+                  doctorData.conditionsTreated.isEmpty
+                      ? SizedBox(
+                          height: 0.0,
+                        )
+                      : Container(
+                          height: 44.0,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: doctorData.conditionsTreated.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(22.0),
+                                    border: Border.all(color: Colors.white),
+                                  ),
+                                  margin: EdgeInsets.only(right: 13.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 13.0,
+                                        bottom: 5.0,
+                                        right: 20.0,
+                                        left: 20.0),
+                                    child: Text(
+                                        doctorData.conditionsTreated[index],
+                                        style: TextStyle(color: Colors.white)),
+                                  ),
+                                );
+                              })),
                   Expanded(
                       child: Container(
                     width: double.infinity,
@@ -295,7 +306,17 @@ class DoctorIndividual extends StatelessWidget {
                 ],
               ),
               floatingActionButton: FloatingActionButton.extended(
-                onPressed: () => print("FAB"),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AppointmentBooking(doctorId: widget.doctorId),
+                  ),
+                ),
+                // onPressed: () => DatabaseService().setAppointment(
+                //     uid: user.uid,
+                //     doctorId: doctorId,
+                //     dateTime: DateTime.now()),
                 icon: Icon(Icons.book),
                 backgroundColor: Colors.green,
                 label: Text(

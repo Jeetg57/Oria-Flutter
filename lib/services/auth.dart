@@ -18,14 +18,14 @@ class AuthService {
   Future registerWithEmailAndPassword(String email, String password,
       String personName, DateTime birthdate) async {
     try {
-      var result = await _auth.createUserWithEmailAndPassword(
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
       await DatabaseService(uid: user.uid)
           .setUserDetails(personName, birthdate, email);
       //create a new document for the user with the uid
       // await DatabaseService(uid: user.uid).updateUserData('0', personName, 100);
-      user.sendEmailVerification();
+      await user.sendEmailVerification();
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
@@ -36,7 +36,7 @@ class AuthService {
   //Sign in with E-mail and password
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
-      var result = await _auth.signInWithEmailAndPassword(
+      UserCredential result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
       return _userFromFirebaseUser(user);

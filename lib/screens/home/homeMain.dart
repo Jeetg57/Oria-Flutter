@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:oria/models/user.dart';
 import 'package:oria/screens/hospitals/hospitalsMap.dart';
 import 'package:oria/services/auth.dart';
@@ -8,6 +9,8 @@ import 'package:oria/shared/loadingWidget.dart';
 import 'package:provider/provider.dart';
 
 class HomeMain extends StatelessWidget {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
@@ -18,14 +21,38 @@ class HomeMain extends StatelessWidget {
           if (snapshot.hasData) {
             UserData userData = snapshot.data;
             return Scaffold(
-                backgroundColor: Colors.white,
+                key: _scaffoldKey,
+                backgroundColor: Color.fromRGBO(247, 249, 249, 1),
                 appBar: AppBar(
+                  leading: IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => _scaffoldKey.currentState.openDrawer()),
                   elevation: 0.0,
                   title: Text(
                     "Oria",
-                    style: TextStyle(color: Colors.white, fontSize: 24.0),
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24.0,
+                        fontFamily: "Poppins"),
                   ),
-                  backgroundColor: Colors.green,
+                  backgroundColor: Color.fromRGBO(247, 249, 249, 1),
+                  actions: [
+                    IconButton(
+                        icon: Icon(
+                          Icons.person,
+                          color: Colors.black,
+                        ),
+                        onPressed: null),
+                    IconButton(
+                        icon: Icon(
+                          Icons.settings,
+                          color: Colors.black,
+                        ),
+                        onPressed: null)
+                  ],
                 ),
                 drawer: Drawer(
                   child: ListView(
@@ -71,15 +98,22 @@ class HomeMain extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hi ${userData.name},",
+                        DateFormat.MMMMEEEEd().format(DateTime.now()),
+                        style: TextStyle(fontFamily: "Poppins"),
+                      ),
+                      Text(
+                        "Hi, ${userData.name}",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 30.0,
                             fontFamily: "Poppins"),
                       ),
                       Text(
-                        "What do you want to do today?",
+                        "Hope you're well today",
                         style: TextStyle(fontSize: 18.0, fontFamily: "Poppins"),
+                      ),
+                      SizedBox(
+                        height: 10.0,
                       ),
                       Container(
                         width: double.infinity,
@@ -176,6 +210,47 @@ class HomeMain extends StatelessWidget {
                                       ),
                                       subtitle: Text(
                                         "Locate the nearest hospital",
+                                        style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                            fontFamily: "Poppins"),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              child: Card(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    ListTile(
+                                      onTap: () => Navigator.pushNamed(
+                                          context, "/appointments"),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 10.0),
+                                      title: Text(
+                                        "My Appointments",
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: "Poppins"),
+                                      ),
+                                      leading: Icon(
+                                        Icons.timer,
+                                        size: 40.0,
+                                        color: Colors.green,
+                                      ),
+                                      subtitle: Text(
+                                        "View appointments made",
                                         style: TextStyle(
                                             fontSize: 14.0,
                                             color: Colors.grey,

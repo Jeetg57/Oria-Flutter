@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oria/models/doctor.dart';
+import 'package:oria/models/user.dart';
 import 'package:oria/screens/doctors/listing_doctors/doctorsList.dart';
 import 'package:oria/services/database.dart';
 import 'package:oria/shared/constants.dart';
