@@ -16,6 +16,7 @@ class DoctorIndividual extends StatefulWidget {
 class _DoctorIndividualState extends State<DoctorIndividual> {
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return StreamBuilder<DoctorData>(
         stream: DatabaseService().doctorData(widget.doctorId),
         builder: (context, snapshot) {
@@ -29,6 +30,7 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
               rating = doctorData.totalRatings / doctorData.numRated;
             }
             return Scaffold(
+              key: _scaffoldKey,
               backgroundColor: Colors.green,
               appBar: AppBar(
                 leading: FlatButton.icon(

@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:oria/models/appointments.dart';
 import 'package:oria/models/doctor.dart';
+import 'package:oria/models/doctorSchedule.dart';
 import 'package:oria/models/user.dart';
 
 class DatabaseService {
@@ -19,11 +24,12 @@ class DatabaseService {
   final CollectionReference appointmentCollection =
       FirebaseFirestore.instance.collection('appointments');
 
-  // Future updateUserData(String sugars, String name, int strength) async {
-  //   return await brewCollection
-  //       .document(uid)
-  //       .setData({'sugars': sugars, 'name': name, 'strength': strength});
-  // }
+  final CollectionReference doctorScheduleCollection =
+      FirebaseFirestore.instance.collection('doctor_schedule');
+  final CollectionReference testScheduleCollection =
+      FirebaseFirestore.instance.collection('test');
+
+  final geo = Geoflutterfire();
   Future setAppointment(
       {String uid, String doctorId, DateTime dateTime}) async {
     try {
@@ -40,6 +46,23 @@ class DatabaseService {
       return null;
     }
   }
+
+  // Future setLocation({String uid}) async {
+  //   try {
+  //     GeoFirePoint myLocation =
+  //         geo.point(latitude: -1.269650, longitude: 36.808920);
+  //     await testScheduleCollection.doc().set({
+  //       "userId": uid,
+  //       "name": "JeetGohil",
+  //       "bookedAt": DateTime.now(),
+  //       "position": myLocation.data
+  //     });
+  //     return true;
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return null;
+  //   }
+  // }
 
   Future setUserDetails(String name, DateTime birthdate, String email) async {
     return await userCollection
@@ -103,6 +126,28 @@ class DatabaseService {
     return userCollection.doc(uid).snapshots().map(_userDataFromSnapshot);
   }
 
+  Stream<List<DoctorData>> doctorDocs(center, double radius) {
+    return geo
+        .collection(collectionRef: doctorsCollection)
+        .within(
+            center: center, radius: radius, field: "position", strictMode: true)
+        .map(_doctorListFromSnapshots);
+  }
+
+  List<DoctorData> _doctorListFromSnapshots(List<DocumentSnapshot> snapshot) {
+    return snapshot.map((DocumentSnapshot document) {
+      return DoctorData(
+        id: document.id,
+        name: document.data()['name'] ?? "",
+        specialty: document.data()['specialty'] ?? "",
+        appointmentPrice: document.data()['appointmentPrice'] ?? 0,
+        city: document.data()['city'] ?? "",
+        totalRatings: document.data()['totalRatings'] ?? 0,
+        numRated: document.data()['numRated'] ?? 0,
+      );
+    }).toList();
+  }
+
   Stream<DoctorData> doctorData(doctorId) {
     return doctorsCollection
         .doc(doctorId)
@@ -113,31 +158,31 @@ class DatabaseService {
   Stream<List<Appointment>> appointmentData(userId) {
     return appointmentCollection
         .where("userId", isEqualTo: userId)
+        .orderBy("time")
+        .where("time", isGreaterThanOrEqualTo: Timestamp.now())
         .orderBy("approval")
         .snapshots()
         .map(_appointmentDataFromSnapshot);
   }
-}
 
-List<Appointment> _appointmentDataFromSnapshot(QuerySnapshot snapshot) {
-  try {
-    return snapshot.docs.map((document) {
-      DateTime bookedAt =
-          DateTime.parse(document.data()['bookedAt'].toDate().toString());
-      DateTime time =
-          DateTime.parse(document.data()['time'].toDate().toString());
+  List<Appointment> _appointmentDataFromSnapshot(QuerySnapshot snapshot) {
+    try {
+      return snapshot.docs.map((document) {
+        DateTime bookedAt =
+            DateTime.parse(document.data()['bookedAt'].toDate().toString());
+        DateTime time =
+            DateTime.parse(document.data()['time'].toDate().toString());
 
-      return Appointment(
-          userId: document.data()['userId'] ?? "",
-          approval: document.data()['approval'] ?? "",
-          bookedAt: bookedAt,
-          time: time,
-          doctorId: document.data()['doctorId'] ?? ""
-          // birthdate: snapshot.data['birthdate']);
-          );
-    }).toList();
-  } catch (e) {
-    print(e.toString());
-    return null;
+        return Appointment(
+            userId: document.data()['userId'] ?? "",
+            approval: document.data()['approval'] ?? "",
+            bookedAt: bookedAt,
+            time: time,
+            doctorId: document.data()['doctorId'] ?? "");
+      }).toList();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 }

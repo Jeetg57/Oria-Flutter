@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:oria/models/doctor.dart';
-import 'package:oria/models/user.dart';
 import 'package:oria/screens/doctors/listing_doctors/doctorsList.dart';
 import 'package:oria/services/database.dart';
 import 'package:oria/shared/constants.dart';
@@ -12,11 +12,14 @@ class Doctors extends StatefulWidget {
 }
 
 class _DoctorsState extends State<Doctors> {
+  final geo = Geoflutterfire();
+  double _currentSliderValue = 20.0;
   String search = "";
   @override
   Widget build(BuildContext context) {
+    GeoFirePoint center = geo.point(latitude: -1.269650, longitude: 36.808920);
     return StreamProvider<List<DoctorData>>.value(
-      value: DatabaseService().doctors,
+      value: DatabaseService().doctorDocs(center, _currentSliderValue),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -111,64 +114,85 @@ class _DoctorsState extends State<Doctors> {
                       },
                     ),
                   ),
-                  SizedBox(height: 10.0),
-                  Container(
-                    color: Colors.grey[300],
-                    width: double.infinity,
-                    height: 2,
-                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "BRANCHES",
-                              style: TextStyle(fontSize: 12.0),
-                            ),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            Text(
-                              "Radiology",
-                              style: TextStyle(fontSize: 18.0),
-                            )
-                          ],
-                        ),
-                        Container(
-                          color: Colors.grey[300],
-                          width: 2,
-                          height: 40.0,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "AVAILABILITY",
-                              style: TextStyle(fontSize: 12.0),
-                            ),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            Text(
-                              "13/07/2020",
-                              style: TextStyle(fontSize: 18.0),
-                            )
-                          ],
-                        ),
-                      ],
+                    child: Text(
+                      "Filter by Distance (km)",
+                      style: TextStyle(
+                          fontFamily: "Poppins", fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Container(
-                    color: Colors.grey[300],
-                    width: double.infinity,
-                    height: 2,
+
+                  Slider(
+                    value: _currentSliderValue,
+                    min: 10,
+                    max: 110,
+                    divisions: 10,
+                    label: "${_currentSliderValue.round().toString()} Km",
+                    onChanged: (double value) {
+                      setState(() {
+                        _currentSliderValue = value;
+                      });
+                    },
                   ),
                   SizedBox(height: 10.0),
+                  // Container(
+                  //   color: Colors.grey[300],
+                  //   width: double.infinity,
+                  //   height: 2,
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(8.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           Text(
+                  //             "BRANCHES",
+                  //             style: TextStyle(fontSize: 12.0),
+                  //           ),
+                  //           SizedBox(
+                  //             height: 10.0,
+                  //           ),
+                  //           Text(
+                  //             "Radiology",
+                  //             style: TextStyle(fontSize: 18.0),
+                  //           )
+                  //         ],
+                  //       ),
+                  //       Container(
+                  //         color: Colors.grey[300],
+                  //         width: 2,
+                  //         height: 40.0,
+                  //       ),
+                  //       Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           Text(
+                  //             "AVAILABILITY",
+                  //             style: TextStyle(fontSize: 12.0),
+                  //           ),
+                  //           SizedBox(
+                  //             height: 10.0,
+                  //           ),
+                  //           Text(
+                  //             "13/07/2020",
+                  //             style: TextStyle(fontSize: 18.0),
+                  //           )
+                  //         ],
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // Container(
+                  //   color: Colors.grey[300],
+                  //   width: double.infinity,
+                  //   height: 2,
+                  // ),
+                  // SizedBox(height: 10.0),
                 ],
               ),
             ),

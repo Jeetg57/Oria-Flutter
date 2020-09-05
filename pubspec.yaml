@@ -45,6 +45,10 @@ dependencies:
   transparent_image: ^1.0.0
   firebase_storage: ^4.0.0
   table_calendar: ^2.2.3
+  material_dialog: ^0.0.9
+  rive: ^0.5.2
+  flare_flutter: ^2.0.6
+  flutter_inner_drawer: "^0.5.7+2"
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,6 +66,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/animations/
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -41,7 +41,9 @@ class AppointmentTile extends StatelessWidget {
               ),
             );
           } else {
-            return LoadingWidget();
+            return Container(
+              child: Text(""),
+            );
           }
         });
   }

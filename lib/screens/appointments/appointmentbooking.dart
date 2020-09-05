@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:material_dialog/material_dialog.dart';
+import 'package:oria/screens/appointments/appointment_status.dart';
+import 'package:oria/services/AppointmentService/UserAppointments.dart';
 import 'package:oria/services/database.dart';
-import 'package:oria/shared/datepicker.dart';
 import 'package:oria/shared/loadingWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:oria/models/user.dart';
@@ -17,10 +20,17 @@ class AppointmentBooking extends StatefulWidget {
 }
 
 class _AppointmentBookingState extends State<AppointmentBooking> {
+  String time;
+  static const _DAYS = 31;
+  var doctorSchedule;
+  List<String> sched;
   DateTime _date = DateTime.now();
   DateFormat formattedDate = new DateFormat('MMMMEEEEd');
+  DateFormat formattedDay = new DateFormat('EEEEE');
+  bool buttonEnabled = false;
   bool loading = false;
   bool showConfirmed = false;
+
   var _calendarController;
   _showCupertinoDialog({String title, String content, String buttonText}) {
     showDialog(
@@ -40,38 +50,11 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
             ));
   }
 
-  _showMaterialDialog({String title, String content, String buttonText}) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => new AlertDialog(
-              title: new Text(title),
-              content: new Text(content),
-              titleTextStyle: TextStyle(
-                  fontFamily: "Poppins",
-                  color: Colors.black,
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold),
-              contentTextStyle:
-                  TextStyle(fontFamily: "Poppins", color: Colors.black),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text(
-                    buttonText,
-                    style:
-                        TextStyle(fontFamily: "Poppins", color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            ));
-  }
-
   @override
   void initState() {
     super.initState();
     _calendarController = CalendarController();
+    getSchedule();
   }
 
   @override
@@ -80,8 +63,40 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
     super.dispose();
   }
 
+  getSchedule() async {
+    setState(() {
+      loading = true;
+    });
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection("doctor_schedule")
+          .doc(widget.doctorId)
+          .get();
+      setState(() {
+        loading = false;
+        doctorSchedule = doc.data();
+      });
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        loading = false;
+      });
+      return null;
+    }
+  }
+
+  // listSchedule(schedule) {
+  //   List<String> sched = List.from(schedule["${formattedDay.format(_date)}"]);
+  //   return sched;
+  // }
+
   @override
   Widget build(BuildContext context) {
+    if (doctorSchedule != null) {
+      setState(() {
+        sched = List.from(doctorSchedule["${formattedDay.format(_date)}"]);
+      });
+    }
     final user = Provider.of<UserFB>(context);
     return loading
         ? LoadingWidget()
@@ -109,97 +124,383 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
                 )
               ],
             ),
-            body: SingleChildScrollView(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 35.0, vertical: 0.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      direction: Axis.horizontal,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/images/mask-man.svg",
-                          height: 100.0,
-                        ),
-                        Text(
-                          "Select a date for your appointment",
-                          style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.grey,
-                                offset: Offset(0, 2),
-                                blurRadius: 1.0,
-                                spreadRadius: 1.0),
-                          ],
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10.0)),
-                      child: TableCalendar(
-                        calendarController: _calendarController,
-                        initialSelectedDay: DateTime.now(),
-                        onDaySelected: (day, events) {
-                          setState(() {
-                            _date = day;
-                          });
-                        },
-                        startDay: DateTime.now(),
+            body: doctorSchedule == null
+                ? Container(
+                    child: Text("This doctor is unavailable"),
+                  )
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 35.0, vertical: 0.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            direction: Axis.horizontal,
+                            children: [
+                              SvgPicture.asset(
+                                "assets/images/mask-man.svg",
+                                height: 100.0,
+                              ),
+                              Text(
+                                "Select a date for your appointment",
+                                style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 30.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(5.0),
+                            decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      offset: Offset(0, 2),
+                                      blurRadius: 1.0,
+                                      spreadRadius: 1.0),
+                                ],
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10.0)),
+                            child: TableCalendar(
+                              calendarController: _calendarController,
+                              initialSelectedDay: DateTime.now(),
+                              endDay: DateTime.now().add(Duration(days: _DAYS)),
+                              weekendDays: [DateTime.sunday],
+                              calendarStyle: CalendarStyle(
+                                  todayColor: Colors.green[200],
+                                  selectedColor: Colors.green,
+                                  weekdayStyle:
+                                      TextStyle(fontFamily: "Poppins"),
+                                  weekendStyle: TextStyle(
+                                      fontFamily: "Poppins",
+                                      color: Colors.redAccent),
+                                  selectedStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontFamily: "Poppins")),
+                              headerStyle: HeaderStyle(
+                                  titleTextStyle:
+                                      TextStyle(fontFamily: "Poppins"),
+                                  centerHeaderTitle: true),
+                              availableGestures:
+                                  AvailableGestures.horizontalSwipe,
+                              startingDayOfWeek: StartingDayOfWeek.monday,
+                              onDaySelected: (day, events) {
+                                print(day);
+                                setState(() {
+                                  time = null;
+                                  _date = day;
+                                });
+                              },
+                              startDay: DateTime.now(),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          doctorSchedule["${formattedDay.format(_date)}"]
+                                      .length ==
+                                  0
+                              ? Column(
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        "Doctor is unavailable on this day. Please pick another day or doctor",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20.0),
+                                      ),
+                                    ),
+                                    RaisedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Go back"),
+                                    )
+                                  ],
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text("Please select a time"),
+                                        SizedBox(
+                                          width: 20.0,
+                                        ),
+                                        DropdownButton<String>(
+                                          icon: Icon(Icons.arrow_downward),
+                                          value: time,
+                                          hint: Text("Select time"),
+                                          items: sched
+                                              .map<DropdownMenuItem<String>>(
+                                                  (value) {
+                                            return DropdownMenuItem(
+                                                child: Text(value),
+                                                value: value);
+                                          }).toList(),
+                                          elevation: 1,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              time = value;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        RaisedButton(
+                                          onPressed: time != null
+                                              ? () async {
+                                                  loading = true;
+                                                  var timeArr =
+                                                      time.split(" - ");
+                                                  var firstTime =
+                                                      timeArr[0].split(":");
+                                                  var hour =
+                                                      int.parse(firstTime[0]);
+                                                  var minute =
+                                                      int.parse(firstTime[1]);
+                                                  var appointment =
+                                                      new DateTime(
+                                                          _date.year,
+                                                          _date.month,
+                                                          _date.day,
+                                                          hour,
+                                                          minute
+                                                          // time.split(" - ").
+                                                          );
+                                                  // print(appointment);
+                                                  bool isFree =
+                                                      await UserAppointments()
+                                                          .userAppointmentData(
+                                                              user.uid,
+                                                              appointment);
+                                                  if (isFree) {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          new MaterialDialog(
+                                                        borderRadius: 8.0,
+                                                        enableFullHeight: true,
+                                                        enableFullWidth: true,
+                                                        enableCloseButton: true,
+                                                        closeButtonColor:
+                                                            Colors.white,
+                                                        headerColor:
+                                                            Colors.green,
+                                                        title: Text(
+                                                          "Appointment Confirmation",
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 18.0,
+                                                          ),
+                                                        ),
+                                                        subTitle: Text(
+                                                          "",
+                                                          style: TextStyle(
+                                                            color:
+                                                                Colors.white70,
+                                                            fontSize: 12.0,
+                                                          ),
+                                                        ),
+                                                        onCloseButtonClicked:
+                                                            () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        children: <Widget>[
+                                                          Text(
+                                                            "Confirm your appointment with this doctor",
+                                                            style: TextStyle(
+                                                              fontSize: 18.0,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 8.0),
+                                                          Text(
+                                                            "By clicking 'OK', you will book an appointment with this doctor on: ${formattedDate.format(appointment)}",
+                                                            style: TextStyle(
+                                                              fontSize: 12.0,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              height: 16.0),
+                                                          // TextField(
+                                                          //   decoration: InputDecoration(hintText: 'Enter Username'),
+                                                          // ),
+                                                        ],
+                                                        actions: <Widget>[
+                                                          FlatButton(
+                                                            child: Text(
+                                                              'CANCEL',
+                                                              style: Theme.of(
+                                                                      context)
+                                                                  .textTheme
+                                                                  .button
+                                                                  .copyWith(
+                                                                      fontSize:
+                                                                          12.0,
+                                                                      color: Theme.of(
+                                                                              context)
+                                                                          .primaryColor),
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                          ),
+                                                          FlatButton(
+                                                            child: Text(
+                                                              'OK',
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              setState(() {
+                                                                loading = true;
+                                                              });
+                                                              var result = DatabaseService()
+                                                                  .setAppointment(
+                                                                      doctorId:
+                                                                          widget
+                                                                              .doctorId,
+                                                                      uid: user
+                                                                          .uid,
+                                                                      dateTime:
+                                                                          appointment);
+                                                              if (result ==
+                                                                  null) {
+                                                                setState(() {
+                                                                  loading =
+                                                                      false;
+                                                                });
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                Status(status: false)));
+                                                              } else {
+                                                                setState(() {
+                                                                  loading =
+                                                                      false;
+                                                                });
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                Status(status: true)));
+                                                              } // Navigator.pop(context, DialogDemoAction.agree.toString());
+                                                            },
+                                                          )
+                                                        ],
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          new MaterialDialog(
+                                                        borderRadius: 8.0,
+                                                        enableFullHeight: true,
+                                                        enableFullWidth: true,
+                                                        enableCloseButton: true,
+                                                        closeButtonColor:
+                                                            Colors.white,
+                                                        headerColor: Colors.red,
+                                                        title: Icon(
+                                                          Icons.cancel,
+                                                          color: Colors.white,
+                                                          size: 20.0,
+                                                        ),
+                                                        subTitle: Text(
+                                                          "Appointment Rejection",
+                                                          style: TextStyle(
+                                                            color:
+                                                                Colors.white70,
+                                                            fontSize: 12.0,
+                                                          ),
+                                                        ),
+                                                        onCloseButtonClicked:
+                                                            () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        children: <Widget>[
+                                                          Text(
+                                                            "You have already have a requested appointment at this time either with this doctor or another.",
+                                                            style: TextStyle(
+                                                              fontSize: 18.0,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 8.0),
+                                                          Text(
+                                                            "Please check your appointment schedule.",
+                                                            style: TextStyle(
+                                                              fontSize: 12.0,
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                              height: 16.0),
+                                                          // TextField(
+                                                          //   decoration: InputDecoration(hintText: 'Enter Username'),
+                                                          // ),
+                                                        ],
+                                                        actions: <Widget>[
+                                                          FlatButton(
+                                                            child: Text(
+                                                              'OK',
+                                                              style: Theme.of(
+                                                                      context)
+                                                                  .textTheme
+                                                                  .button
+                                                                  .copyWith(
+                                                                      fontSize:
+                                                                          12.0,
+                                                                      color: Theme.of(
+                                                                              context)
+                                                                          .primaryColor),
+                                                            ),
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              : null,
+                                          child: Text("Book Appointment"),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 30.0,
+                                    ),
+                                  ],
+                                ),
+                        ],
                       ),
                     ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        RaisedButton(
-                          onPressed: () async {
-                            loading = true;
-                            var result = DatabaseService().setAppointment(
-                                doctorId: widget.doctorId,
-                                uid: user.uid,
-                                dateTime: _date);
-                            if (result == null) {
-                              setState(() {
-                                loading = false;
-                              });
-                              _showMaterialDialog(
-                                  title: "An Error Occured",
-                                  content: "Please try again",
-                                  buttonText: "Close");
-                            } else {
-                              setState(() {
-                                loading = false;
-                              });
-                              _showMaterialDialog(
-                                  title: "Appointment pending approval",
-                                  content:
-                                      "You have requested this doctor for an appointment on: ${formattedDate.format(_date)}",
-                                  buttonText: "Close");
-                            }
-                          },
-                          child: Text("Book Appointment"),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ),
+                  ),
           );
   }
 }
+
+class DialogDemoAction {}

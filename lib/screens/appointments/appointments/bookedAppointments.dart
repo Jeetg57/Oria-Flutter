@@ -27,10 +27,11 @@ class _MyAppointmentsState extends State<MyAppointments> {
               icon: Icon(Icons.arrow_back_ios, color: Colors.black),
               label: Text("")),
           elevation: 0.0,
-          title: Text(
-            "My Appointments",
-            style: TextStyle(color: Colors.black),
-          ),
+          title: Text("Upcoming Appointments",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Poppins")),
           backgroundColor: Color.fromRGBO(247, 249, 249, 1),
           actions: [
             Padding(
