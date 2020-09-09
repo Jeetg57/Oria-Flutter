@@ -4,7 +4,6 @@ import 'package:oria/models/appointments.dart';
 import 'package:oria/models/doctor.dart';
 import 'package:oria/screens/appointments/appointment/appointment.dart';
 import 'package:oria/services/database.dart';
-import 'package:oria/shared/loadingWidget.dart';
 
 class AppointmentTile extends StatelessWidget {
   final Appointment appointment;

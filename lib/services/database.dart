@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:oria/models/appointments.dart';
 import 'package:oria/models/doctor.dart';
-import 'package:oria/models/doctorSchedule.dart';
 import 'package:oria/models/user.dart';
 
 class DatabaseService {

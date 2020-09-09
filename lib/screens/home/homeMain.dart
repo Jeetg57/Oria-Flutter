@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import 'package:flutter_inner_drawer/inner_drawer.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:oria/models/user.dart';
 import 'package:oria/screens/hospitals/hospitalsMap.dart';
@@ -27,7 +26,7 @@ class HomeMain extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<UserFB>(context);
     final double devWidth = MediaQuery.of(context).size.width;
-    final double devHeight = MediaQuery.of(context).size.height;
+    // final double devHeight = MediaQuery.of(context).size.height;
     return StreamBuilder<UserData>(
         stream: DatabaseService(uid: user.uid).userData,
         builder: (context, snapshot) {

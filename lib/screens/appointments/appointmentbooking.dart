@@ -32,23 +32,23 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
   bool showConfirmed = false;
 
   var _calendarController;
-  _showCupertinoDialog({String title, String content, String buttonText}) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => new CupertinoAlertDialog(
-              title: new Text(title),
-              content: new Text(content),
-              insetAnimationCurve: Curves.easeInOutSine,
-              actions: <Widget>[
-                FlatButton(
-                  child: Text(buttonText),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            ));
-  }
+  // _showCupertinoDialog({String title, String content, String buttonText}) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) => new CupertinoAlertDialog(
+  //             title: new Text(title),
+  //             content: new Text(content),
+  //             insetAnimationCurve: Curves.easeInOutSine,
+  //             actions: <Widget>[
+  //               FlatButton(
+  //                 child: Text(buttonText),
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                 },
+  //               )
+  //             ],
+  //           ));
+  // }
 
   @override
   void initState() {
