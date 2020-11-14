@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:oria/models/appointments.dart';
@@ -9,6 +12,9 @@ import 'package:oria/models/user.dart';
 class DatabaseService {
   final String uid;
   DatabaseService({this.uid});
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseMessaging fcm = FirebaseMessaging();
+
   final StorageReference storageReferenceUser =
       FirebaseStorage().ref().child("userImages");
 
@@ -25,6 +31,22 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('doctor_schedule');
   final CollectionReference testScheduleCollection =
       FirebaseFirestore.instance.collection('test');
+
+  saveDeviceToken() async {
+    String fcmToken = await fcm.getToken();
+    User user = _auth.currentUser;
+    if (fcmToken != null) {
+      await userCollection
+          .doc(user.uid)
+          .collection('tokens')
+          .doc(fcmToken)
+          .set({
+        'token': fcmToken,
+        'createdAt': FieldValue.serverTimestamp(),
+        'platform': Platform.operatingSystem
+      });
+    }
+  }
 
   final geo = Geoflutterfire();
   Future setAppointment(
@@ -85,12 +107,17 @@ class DatabaseService {
 
   // user data from snapshot
   UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
+    DateTime joined =
+        DateTime.parse(snapshot.data()['joined'].toDate().toString());
+    DateTime birthdate =
+        DateTime.parse(snapshot.data()['birthdate'].toDate().toString());
     return UserData(
       uid: uid,
       name: snapshot.data()['name'],
       email: snapshot.data()['email'],
-      profilePicture: snapshot.data()['profilePicture'],
-      // birthdate: snapshot.data['birthdate']);
+      pictureLink: snapshot.data()['profilePicture'] ?? null,
+      birthdate: birthdate,
+      joined: joined,
     );
   }
 
@@ -103,7 +130,7 @@ class DatabaseService {
       experience: snapshot.data()['experience'] ?? 0,
       description: snapshot.data()['description'] ?? "",
       numRated: snapshot.data()['numRated'] ?? 0,
-      pictureLink: snapshot.data()['pictureLink'] ?? "",
+      pictureLink: snapshot.data()['image'] ?? null,
       totalRatings: snapshot.data()['totalRatings'] ?? 0,
       location1: snapshot.data()['location1'] ?? "",
       location2: snapshot.data()['location2'] ?? "",
@@ -134,14 +161,14 @@ class DatabaseService {
   List<DoctorData> _doctorListFromSnapshots(List<DocumentSnapshot> snapshot) {
     return snapshot.map((DocumentSnapshot document) {
       return DoctorData(
-        id: document.id,
-        name: document.data()['name'] ?? "",
-        specialty: document.data()['specialty'] ?? "",
-        appointmentPrice: document.data()['appointmentPrice'] ?? 0,
-        city: document.data()['city'] ?? "",
-        totalRatings: document.data()['totalRatings'] ?? 0,
-        numRated: document.data()['numRated'] ?? 0,
-      );
+          id: document.id,
+          name: document.data()['name'] ?? "",
+          specialty: document.data()['specialty'] ?? "",
+          appointmentPrice: document.data()['appointmentPrice'] ?? 0,
+          city: document.data()['city'] ?? "",
+          totalRatings: document.data()['totalRatings'] ?? 0,
+          numRated: document.data()['numRated'] ?? 0,
+          pictureLink: document.data()['image']);
     }).toList();
   }
 
@@ -180,6 +207,22 @@ class DatabaseService {
     } catch (e) {
       print(e.toString());
       return null;
+    }
+  }
+
+  Future updateImage({String uid, String url}) async {
+    try {
+      await userCollection.doc(uid).update({"profilePicture": url});
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future removeImage({String uid}) async {
+    try {
+      await userCollection.doc(uid).update({"profilePicture": null});
+    } catch (e) {
+      print(e.toString());
     }
   }
 }

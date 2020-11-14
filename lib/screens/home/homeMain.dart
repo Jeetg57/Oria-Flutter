@@ -1,17 +1,32 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:oria/models/user.dart';
+import 'package:oria/screens/home/popDoctors.dart';
 import 'package:oria/screens/hospitals/hospitalsMap.dart';
+import 'package:oria/screens/imageViewer/imageViewer.dart';
+import 'package:oria/screens/profile/profile.dart';
 import 'package:oria/services/auth.dart';
 import 'package:oria/services/database.dart';
 import 'package:oria/shared/loadingWidget.dart';
 import 'package:provider/provider.dart';
 
-class HomeMain extends StatelessWidget {
+class HomeMain extends StatefulWidget {
+  @override
+  _HomeMainState createState() => _HomeMainState();
+}
+
+class _HomeMainState extends State<HomeMain> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final GlobalKey<InnerDrawerState> _innerDrawerKey =
       GlobalKey<InnerDrawerState>();
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   void _toggle() {
     _innerDrawerKey.currentState.toggle(
@@ -21,7 +36,54 @@ class HomeMain extends StatelessWidget {
         direction: InnerDrawerDirection.end);
   }
 
+  StreamSubscription iosSubscription;
+  final DatabaseService databaseService = DatabaseService();
+
+  void initState() {
+    super.initState();
+
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      final notification = message['notification'];
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                content: ListTile(
+                  title: Text(notification['title']),
+                  subtitle: Text(
+                    notification['body'],
+                  ),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('OK'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              )); // setState(() {
+      //   messages.add(
+      //       Message(title: notification['title'], body: notification['body']));
+      // });
+    }, onLaunch: (Map<String, dynamic> message) async {
+      await Navigator.pushNamed(context, "/appointments");
+    }, onResume: (Map<String, dynamic> message) async {
+      await Navigator.pushNamed(context, "/appointments");
+    });
+    if (Platform.isIOS) {
+      iosSubscription =
+          _firebaseMessaging.onIosSettingsRegistered.listen((event) {
+        databaseService.saveDeviceToken();
+      });
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(sound: true, alert: true, badge: true));
+    } else {
+      databaseService.saveDeviceToken();
+    }
+  }
+
   final AuthService _auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserFB>(context);
@@ -73,10 +135,22 @@ class HomeMain extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        CircleAvatar(
-                          radius: devWidth * 0.1,
-                          backgroundImage: NetworkImage(
-                              "https://firebasestorage.googleapis.com/v0/b/oria-68e38.appspot.com/o/userImages%2Fperson1.jpg?alt=media&token=f94732ef-c7c4-4e13-b58a-3346299301f5"),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => OriaImageView(
+                                      url: userData.pictureLink))),
+                          child: Hero(
+                            tag: "image-view",
+                            child: CircleAvatar(
+                              backgroundImage: userData.pictureLink != null
+                                  ? NetworkImage(userData.pictureLink)
+                                  : AssetImage(
+                                      "assets/images/person_placeholder.png"),
+                              radius: devWidth * 0.1,
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -86,37 +160,32 @@ class HomeMain extends StatelessWidget {
                                 title: Text("My Profile",
                                     style: TextStyle(
                                         color: Colors.white,
-                                        fontFamily: "Poppins")),
+                                        fontFamily: "Poppins",
+                                        fontSize: 14.0)),
                                 leading:
                                     Icon(Icons.person, color: Colors.white),
-                              ),
-                              ListTile(
-                                title: Text(
-                                  "Messages",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: "Poppins"),
-                                ),
-                                leading: Icon(
-                                  Icons.message,
-                                  color: Colors.white,
-                                ),
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Profile())),
                               ),
                               ListTile(
                                 title: Text("Settings",
                                     style: TextStyle(
                                         color: Colors.white,
-                                        fontFamily: "Poppins")),
+                                        fontFamily: "Poppins",
+                                        fontSize: 14.0)),
                                 leading:
                                     Icon(Icons.settings, color: Colors.white),
                               ),
                               ListTile(
                                 title: Text("Sign Out",
                                     style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        fontFamily: "Poppins")),
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontFamily: "Poppins",
+                                    )),
                                 trailing: Icon(
                                   Icons.exit_to_app,
                                   color: Colors.white,
@@ -169,146 +238,86 @@ class HomeMain extends StatelessWidget {
                         //     onPressed: null)
                       ],
                     ),
-                    body: Container(
-                      padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            DateFormat.MMMMEEEEd().format(DateTime.now()),
-                            style: TextStyle(fontFamily: "Poppins"),
-                          ),
-                          Text(
-                            "Hi, ${userData.name}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30.0,
-                                fontFamily: "Poppins"),
-                          ),
-                          Text(
-                            "Hope you're well today",
-                            style: TextStyle(
-                                fontSize: 18.0, fontFamily: "Poppins"),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Container(
-                            width: double.infinity,
-                            child: Card(
-                              // color: Colors.redAccent,
-                              child: Container(
-                                // decoration: BoxDecoration(
-                                //     border: Border.all(color: Colors.red, width: 2.0),
-                                //     borderRadius: BorderRadius.circular(5.0)),
-                                child: ListTile(
-                                  onTap: () => print("Emergency!"),
-                                  leading: Icon(
-                                    Icons.priority_high,
-                                    color: Colors.red,
+                    body: SingleChildScrollView(
+                      physics: ScrollPhysics(parent: BouncingScrollPhysics()),
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    DateFormat.MMMMEEEEd()
+                                        .format(DateTime.now()),
+                                    style: TextStyle(fontFamily: "Poppins"),
                                   ),
-                                  title: Text(
-                                    "Emergency",
+                                  Text(
+                                    "Hi, ${userData.name}",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 20.0,
-                                        color: Colors.red,
+                                        fontSize: 30.0,
                                         fontFamily: "Poppins"),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  child: Card(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        ListTile(
-                                          onTap: () => Navigator.pushNamed(
-                                              context, "/doctors"),
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: 8.0, horizontal: 10.0),
-                                          title: Text(
-                                            "Doctors",
-                                            style: TextStyle(
-                                                fontSize: 20.0,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: "Poppins"),
-                                          ),
-                                          leading: Icon(
-                                            Icons.person,
-                                            size: 40.0,
-                                            color: Colors.green,
-                                          ),
-                                          subtitle: Text(
-                                            "Get in touch with a doctor",
-                                            style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.grey,
-                                                fontFamily: "Poppins"),
+                                  Text(
+                                    "Hope you're well today",
+                                    style: TextStyle(
+                                        fontSize: 18.0, fontFamily: "Poppins"),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Container(
+                                          child: Card(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                ListTile(
+                                                  onTap: () => Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            HospitalsMap()),
+                                                  ),
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                          vertical: 8.0,
+                                                          horizontal: 10.0),
+                                                  title: Text(
+                                                    "Hospitals",
+                                                    style: TextStyle(
+                                                        fontSize: 20.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontFamily: "Poppins"),
+                                                  ),
+                                                  leading: Icon(
+                                                    Icons.local_hospital,
+                                                    size: 40.0,
+                                                    color: Colors.green,
+                                                  ),
+                                                  subtitle: Text(
+                                                    "Locate the nearest hospital",
+                                                    style: TextStyle(
+                                                        fontSize: 14.0,
+                                                        color: Colors.grey,
+                                                        fontFamily: "Poppins"),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  child: Card(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        ListTile(
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    HospitalsMap()),
-                                          ),
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: 8.0, horizontal: 10.0),
-                                          title: Text(
-                                            "Hospitals",
-                                            style: TextStyle(
-                                                fontSize: 20.0,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: "Poppins"),
-                                          ),
-                                          leading: Icon(
-                                            Icons.local_hospital,
-                                            size: 40.0,
-                                            color: Colors.green,
-                                          ),
-                                          subtitle: Text(
-                                            "Locate the nearest hospital",
-                                            style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.grey,
-                                                fontFamily: "Poppins"),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  child: Card(
+                                  Card(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
@@ -341,11 +350,44 @@ class HomeMain extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          )
-                        ],
+                            ),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 15.0),
+                              child: Text("Popular Doctors in your area",
+                                  style: TextStyle(
+                                      fontSize: 20.0,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: "Poppins")),
+                            ),
+                            Container(
+                                width: MediaQuery.of(context).size.width,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.5,
+                                child: PopularDoctors()),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                FlatButton.icon(
+                                    onPressed: () => Navigator.pushNamed(
+                                        context, "/doctors"),
+                                    icon: Icon(Icons.forward),
+                                    label: Text("View All")),
+                              ],
+                            ),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.1,
+                            )
+                          ],
+                        ),
                       ),
                     )));
           } else {

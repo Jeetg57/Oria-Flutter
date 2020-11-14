@@ -59,10 +59,15 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 28.0, top: 7.0),
-                        child: CircleAvatar(
-                          radius: 40.0,
-                          backgroundImage: NetworkImage(
-                              "https://firebasestorage.googleapis.com/v0/b/oria-68e38.appspot.com/o/person1.jpg?alt=media&token=5362a60a-ff36-45c2-a31f-68b70bc13691"),
+                        child: Hero(
+                          tag: widget.doctorId,
+                          child: CircleAvatar(
+                            radius: 40.0,
+                            backgroundImage: doctorData.pictureLink != null
+                                ? NetworkImage(doctorData.pictureLink)
+                                : AssetImage(
+                                    "assets/images/person_placeholder.png"),
+                          ),
                         ),
                       ),
                       Padding(
@@ -78,16 +83,31 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
                                   color: Colors.white,
                                   fontFamily: "Poppins"),
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: Colors.white,
-                                  size: 17.0,
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      color: Colors.white,
+                                      size: 17.0,
+                                    ),
+                                    SizedBox(
+                                      width: 3.0,
+                                    ),
+                                    Text(
+                                      doctorData.city + ", ",
+                                      style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          color: Colors.white,
+                                          wordSpacing: 2.0,
+                                          letterSpacing: 3.0),
+                                    ),
+                                  ],
                                 ),
                                 Text(
-                                  doctorData.city + ", " + doctorData.location1,
+                                  doctorData.location1,
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       color: Colors.white,
@@ -170,25 +190,34 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
                           width: 0.2,
                           height: 22,
                         ),
-                        Container(
-                          padding: EdgeInsets.only(
-                              left: 18.0, right: 18.0, top: 8.0, bottom: 8.0),
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(33)),
-                              gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xff85FFBD),
-                                    Color(0xffFFFB7D),
-                                  ],
-                                  begin: Alignment.bottomRight,
-                                  end: Alignment.centerLeft)),
-                          child: Text(
-                            "Call",
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Poppins",
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AppointmentBooking(doctorId: widget.doctorId),
+                            ),
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.only(
+                                left: 18.0, right: 18.0, top: 8.0, bottom: 8.0),
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(33)),
+                                gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xff85FFBD),
+                                      Color(0xffFFFB7D),
+                                    ],
+                                    begin: Alignment.bottomRight,
+                                    end: Alignment.centerLeft)),
+                            child: Text(
+                              "Book",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "Poppins",
+                              ),
                             ),
                           ),
                         )
@@ -306,25 +335,6 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
                     ),
                   ))
                 ],
-              ),
-              floatingActionButton: FloatingActionButton.extended(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        AppointmentBooking(doctorId: widget.doctorId),
-                  ),
-                ),
-                // onPressed: () => DatabaseService().setAppointment(
-                //     uid: user.uid,
-                //     doctorId: doctorId,
-                //     dateTime: DateTime.now()),
-                icon: Icon(Icons.book),
-                backgroundColor: Colors.green,
-                label: Text(
-                  "Book",
-                  style: TextStyle(fontFamily: "Poppins"),
-                ),
               ),
             );
           } else {

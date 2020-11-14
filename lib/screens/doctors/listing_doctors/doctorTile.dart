@@ -29,8 +29,9 @@ class DoctorTile extends StatelessWidget {
               fadeInDuration: Duration(milliseconds: 10),
               fadeInCurve: Curves.easeInQuad,
               placeholder: 'assets/images/person_placeholder.png',
-              image:
-                  'https://firebasestorage.googleapis.com/v0/b/oria-68e38.appspot.com/o/person1.jpg?alt=media&token=5362a60a-ff36-45c2-a31f-68b70bc13691',
+              image: doctor.pictureLink != null
+                  ? doctor.pictureLink
+                  : "assets/images/person_placeholder.png",
             ),
           ),
           title: Text(doctor.name,

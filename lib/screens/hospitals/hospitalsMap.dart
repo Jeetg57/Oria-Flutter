@@ -19,17 +19,28 @@ class _HospitalsMapState extends State<HospitalsMap> {
     super.initState();
   }
 
-  void _searchNearby(double latitude, double longitude) async {
+  Future _searchNearby(double latitude, double longitude) async {
     setState(() {
       markers.clear();
     });
     String url =
-        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&type=health&key=$_API_KEY';
-    print(url);
+        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&type=hospital&key=$_API_KEY';
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data);
+      var places = data["results"] as List;
+      for (int i = 0; i < places.length; i++) {
+        setState(() {
+          markers.add(Marker(
+            markerId: MarkerId(places[i]["place_id"]),
+            position: LatLng(places[i]["geometry"]["location"]["lat"],
+                places[i]["geometry"]["location"]["lng"]),
+            infoWindow: InfoWindow(
+                title: places[i]["name"], snippet: places[i]["vicinity"]),
+            onTap: () {},
+          ));
+        });
+      }
     } else {
       throw Exception('An error occurred getting places nearby');
     }
@@ -54,25 +65,27 @@ class _HospitalsMapState extends State<HospitalsMap> {
 
   void _animateToUser() async {
     var pos = await location.getLocation();
-    _searchNearby(pos.latitude, pos.longitude);
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(CameraPosition(
         target: LatLng(pos.latitude, pos.longitude),
         zoom: 15.0,
       )),
     );
+    await _searchNearby(pos.latitude, pos.longitude);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           elevation: 0.0,
-          title: Text(
-            "Oria",
-            style: TextStyle(color: Colors.white, fontSize: 24.0),
-          ),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.transparent,
+          leading: FlatButton.icon(
+              padding: EdgeInsets.all(0.0),
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              label: Text("")),
         ),
         body: GoogleMap(
           // _animateToUser(),
@@ -81,10 +94,13 @@ class _HospitalsMapState extends State<HospitalsMap> {
             target: LatLng(0.0, 0.0),
             zoom: 11.0,
           ),
+          mapToolbarEnabled: true,
+          myLocationButtonEnabled: false,
           myLocationEnabled: true,
+          markers: Set<Marker>.of(markers),
           mapType: MapType.normal,
           trafficEnabled: true,
-          compassEnabled: true,
+          compassEnabled: false,
         ));
   }
 }

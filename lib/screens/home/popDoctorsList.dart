@@ -1,24 +1,22 @@
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:oria/models/doctor.dart';
+import 'package:oria/screens/home/popDoctorTile.dart';
 import 'package:provider/provider.dart';
 
-import 'doctorTile.dart';
-
-class DoctorsList extends StatefulWidget {
+class PopDoctorsList extends StatefulWidget {
   @override
-  _DoctorsListState createState() => _DoctorsListState();
+  _PopDoctorsListState createState() => _PopDoctorsListState();
 }
 
-class _DoctorsListState extends State<DoctorsList> {
+class _PopDoctorsListState extends State<PopDoctorsList> {
   @override
   Widget build(BuildContext context) {
     final doctors = Provider.of<List<DoctorData>>(context) ?? [];
-    // print(doctors.length);
     return ListView.builder(
-      addAutomaticKeepAlives: true,
         physics: ScrollPhysics(parent: BouncingScrollPhysics()),
+        scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
-          return DoctorTile(doctor: doctors[index]);
+          return PopDoctorTile(doctor: doctors[index]);
         },
         itemCount: doctors.length);
   }
