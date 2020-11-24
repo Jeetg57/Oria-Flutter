@@ -164,6 +164,7 @@ class DatabaseService {
           id: document.id,
           name: document.data()['name'] ?? "",
           specialty: document.data()['specialty'] ?? "",
+          description: document.data()['description'] ?? "",
           appointmentPrice: document.data()['appointmentPrice'] ?? 0,
           city: document.data()['city'] ?? "",
           totalRatings: document.data()['totalRatings'] ?? 0,
@@ -198,6 +199,7 @@ class DatabaseService {
             DateTime.parse(document.data()['time'].toDate().toString());
 
         return Appointment(
+            appointmentId: document.id ?? "",
             userId: document.data()['userId'] ?? "",
             approval: document.data()['approval'] ?? "",
             bookedAt: bookedAt,

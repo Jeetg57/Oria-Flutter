@@ -22,8 +22,9 @@ class _PopDoctorTileState extends State<PopDoctorTile> {
               child: Hero(
                 tag: widget.doctor.id,
                 child: widget.doctor.pictureLink != null
-                    ? Image.network(
-                        widget.doctor.pictureLink,
+                    ? FadeInImage.assetNetwork(
+                        placeholder: 'assets/images/loading.gif',
+                        image: widget.doctor.pictureLink,
                         fit: BoxFit.cover,
                         width: MediaQuery.of(context).size.width * 0.8,
                       )
@@ -50,7 +51,7 @@ class _PopDoctorTileState extends State<PopDoctorTile> {
                       style: TextStyle(fontSize: 15.0, fontFamily: "Poppins")),
                   RaisedButton.icon(
                       icon: Icon(
-                        Icons.keyboard_arrow_right_outlined,
+                        Icons.keyboard_arrow_right,
                         color: Colors.black,
                       ),
                       onPressed: () => Navigator.push(

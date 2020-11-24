@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oria/models/user.dart';
@@ -47,6 +48,18 @@ class _ProfilePictureState extends State<ProfilePicture> {
     await _databaseService.updateImage(uid: uid, url: url);
   }
 
+  /// Compress Image
+  Future<File> compressImage(File file) async {
+    final filePath = file.absolute.path;
+
+    final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+
+    return await FlutterImageCompress.compressAndGetFile(filePath, outPath,
+        minWidth: 1000, minHeight: 1000, quality: 70);
+  }
+
   Future getCameraImage(String uid) async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
 
@@ -87,6 +100,10 @@ class _ProfilePictureState extends State<ProfilePicture> {
     );
     setState(() {
       _image = cropped ?? _image;
+    });
+    var compressedImage = await compressImage(_image);
+    setState(() {
+      _image = compressedImage;
     });
     saveImage(uid);
   }

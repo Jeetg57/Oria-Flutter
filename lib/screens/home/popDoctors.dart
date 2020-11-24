@@ -5,6 +5,7 @@ import 'package:oria/models/doctor.dart';
 import 'package:oria/screens/home/popDoctorsList.dart';
 import 'package:oria/services/database.dart';
 import 'package:provider/provider.dart';
+import 'package:oria/shared/spinnerWidget.dart';
 
 class PopularDoctors extends StatefulWidget {
   @override
@@ -41,7 +42,7 @@ class _PopularDoctorsState extends State<PopularDoctors> {
         child: PopDoctorsList(),
       );
     } else {
-      return SizedBox();
+      return Spinner();
     }
   }
 }

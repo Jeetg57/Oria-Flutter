@@ -74,6 +74,7 @@ class _HomeMainState extends State<HomeMain> {
       iosSubscription =
           _firebaseMessaging.onIosSettingsRegistered.listen((event) {
         databaseService.saveDeviceToken();
+        iosSubscription.cancel();
       });
       _firebaseMessaging.requestNotificationPermissions(
           const IosNotificationSettings(sound: true, alert: true, badge: true));

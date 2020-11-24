@@ -28,7 +28,8 @@ class AppointmentTile extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AppointmentIndividual(),
+                      builder: (context) => AppointmentIndividual(
+                          appointmentId: appointment.appointmentId),
                     ),
                   ),
                   title: Text("Appointment with Dr. ${doctorData.name}",

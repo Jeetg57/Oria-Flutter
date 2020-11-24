@@ -188,7 +188,7 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
                               availableGestures:
                                   AvailableGestures.horizontalSwipe,
                               startingDayOfWeek: StartingDayOfWeek.monday,
-                              onDaySelected: (day, events) {
+                              onDaySelected: (day, events, holidays) {
                                 print(day);
                                 setState(() {
                                   time = null;
@@ -480,5 +480,3 @@ class _AppointmentBookingState extends State<AppointmentBooking> {
           );
   }
 }
-
-class DialogDemoAction {}
