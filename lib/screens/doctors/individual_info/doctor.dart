@@ -36,7 +36,7 @@ class _DoctorIndividualState extends State<DoctorIndividual> {
                 leading: FlatButton.icon(
                     padding: EdgeInsets.all(0.0),
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                    icon: Icon(Icons.arrow_back, color: Colors.white),
                     label: Text("")),
                 elevation: 0.0,
                 backgroundColor: Colors.green,

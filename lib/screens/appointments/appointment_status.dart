@@ -73,7 +73,9 @@ class Status extends StatelessWidget {
                       children: [
                         RaisedButton(
                           child: Text("Go Home"),
-                          onPressed: () => Navigator.pushNamed(context, "/"),
+                          onPressed: () => Navigator.of(context)
+                              .pushNamedAndRemoveUntil(
+                                  "/", (Route<dynamic> route) => false),
                         ),
                       ],
                     ),

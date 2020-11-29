@@ -24,7 +24,7 @@ class _MyAppointmentsState extends State<MyAppointments> {
           leading: FlatButton.icon(
               padding: EdgeInsets.all(0.0),
               onPressed: () => Navigator.pop(context),
-              icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+              icon: Icon(Icons.arrow_back, color: Colors.black),
               label: Text("")),
           elevation: 0.0,
           title: Text("Upcoming Appointments",

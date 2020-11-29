@@ -6,6 +6,7 @@ import 'package:oria/screens/doctors/listing_doctors/doctors.dart';
 import 'package:oria/services/auth.dart';
 import 'package:provider/provider.dart';
 import 'models/user.dart';
+import 'screens/authenticate/authenticate.dart';
 import 'screens/wrapper.dart';
 import 'services/auth.dart';
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
           // When navigating to the "/" route, build the FirstScreen widget.
           '/': (context) => Wrapper(),
           // When navigating to the "/second" route, build the SecondScreen widget.
+          '/login': (context) => Authenticate(),
           '/doctors': (context) => Doctors(),
           '/appointments': (context) => MyAppointments(),
           '/appointment_status': (context) => Status(),

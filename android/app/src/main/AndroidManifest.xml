@@ -9,8 +9,8 @@
           <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="oria"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Oria"
+        android:icon="@mipmap/launcher_icon">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAFBwQIZa75vXwEEPk5Y4Ui8I6A4DcKbMQ"/>
         <activity

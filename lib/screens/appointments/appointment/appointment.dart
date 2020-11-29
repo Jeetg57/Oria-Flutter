@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oria/screens/appointments/appointment/appointment-notes.dart';
 import 'package:oria/shared/loadingWidget.dart';
 
 class AppointmentIndividual extends StatefulWidget {
@@ -288,8 +289,32 @@ class _AppointmentIndividualState extends State<AppointmentIndividual> {
                       ],
                     ),
                   ),
-                  FloatingActionButton.extended(
-                      onPressed: null, label: Text("View Notes"))
+                  appointment["approval"] == "Booked"
+                      ? Container(
+                          alignment: Alignment.center,
+                          child: RaisedButton.icon(
+                              textColor: Colors.white,
+                              color: Colors.green,
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0),
+                              ),
+                              icon: Icon(
+                                Icons.notes_outlined,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AppointmentNotes(
+                                        appointmentId: widget.appointmentId,
+                                      ),
+                                    ),
+                                  ),
+                              label: Text("View Notes",
+                                  style: TextStyle(
+                                      fontSize: 12.0, fontFamily: "Poppins"))),
+                        )
+                      : SizedBox(width: 10.0),
                 ],
               ),
             ),
